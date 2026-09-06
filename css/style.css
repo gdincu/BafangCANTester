@@ -1,0 +1,143 @@
+body {
+    font-family: system-ui, sans-serif;
+    background: #121212;
+    color: #e0e0e0;
+    padding: 20px;
+    max-width: 800px;
+    margin: auto;
+}
+
+.card {
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+
+button {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-right: 8px;
+    margin-bottom: 10px;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+button:disabled {
+    background: #555;
+    cursor: not-allowed;
+}
+
+.btn-danger {
+    background: #dc3545;
+}
+
+.btn-danger:hover {
+    background: #a71d2a;
+}
+
+.btn-success {
+    background: #28a745;
+}
+
+.btn-success:hover {
+    background: #218838;
+}
+
+.btn-warning {
+    background: #ff9800;
+    color: #111;
+}
+
+.btn-warning:hover {
+    background: #e68900;
+}
+
+input[type="text"] {
+    width: calc(100% - 22px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background: #2a2a2a;
+    color: white;
+    font-family: monospace;
+}
+
+.status {
+    display: inline-block;
+    margin-left: 5px;
+}
+
+.info {
+    color: #aaa;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.capabilities {
+    background: #151515;
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 10px;
+    margin-top: 10px;
+    font-family: monospace;
+    font-size: 13px;
+    white-space: pre-wrap;
+}
+
+.command-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.command-grid button {
+    margin-right: 0;
+}
+
+.log-box {
+    background: #000;
+    color: #0f0;
+    font-family: monospace;
+    padding: 10px;
+    height: 300px;
+    overflow-y: auto;
+    border-radius: 4px;
+    border: 1px solid #333;
+    font-size: 14px;
+}
+
+.tx {
+    color: #ff9800;
+}
+
+.rx {
+    color: #4caf50;
+}
+
+.error {
+    color: #ff5252;
+}
+
+.muted {
+    color: #777;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #333;
+    margin: 20px 0;
+}
+
+code {
+    color: #80cbc4;
+}

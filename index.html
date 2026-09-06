@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bafang CAN-BLE Tester</title>
+<link rel="stylesheet" href="css/style.css">
+</head> 
+<body>
+
+<h2>Bafang CAN-BLE Tester</h2>
+
+<div class="card">
+    <button id="connectBtn">Connect to Bike</button>
+    <button id="disconnectBtn" class="btn-danger" style="display:none;">
+        Disconnect
+    </button>
+    <span id="status" class="status">Status: Disconnected</span>
+    <div id="capabilities" class="capabilities" style="display:none;"></div>
+</div>
+
+<div class="card">
+    <h3>Target Characteristic</h3>
+    <label for="uuidInput" style="font-size: 0.9em; color: #aaa;">
+        Characteristic UUID:
+    </label>
+    <input
+        type="text"
+        id="uuidInput"
+        value="FFF3"
+        placeholder="FFF3 or 0000fff3-0000-1000-8000-00805f9b34fb"
+    >
+    <div class="info">
+        Accepted formats:
+        <code>FFF3</code>,
+        <code>0xFFF3</code>, or a complete 128-bit UUID.
+    </div>
+</div>
+
+<div class="card">
+    <h3>Send Raw Command (Hex)</h3>
+    <label for="hexInput" style="font-size: 0.9em; color: #aaa;">
+        Payload (Hex):
+    </label>
+    <input
+        type="text"
+        id="hexInput"
+        value="02 01 89 01 00 8B 03"
+        placeholder="02 01 89 01 00 8B 03"
+    >
+    <button id="sendBtn" disabled>
+        Send Command
+    </button>
+    <button id="sendWithResponseBtn" disabled class="btn-warning">
+        Write With Response
+    </button>
+    <p class="info">
+        The payload is converted from hexadecimal text into raw binary
+        bytes before being written to the BLE characteristic.
+    </p>
+</div>
+
+<div class="card">
+    <h3>Known Bafang Commands</h3>
+    <h4>PAS Level</h4>
+    <div class="command-grid">
+        <button class="pas-btn" data-pas="0">PAS 0</button>
+        <button class="pas-btn" data-pas="1">PAS 1</button>
+        <button class="pas-btn" data-pas="2">PAS 2</button>
+        <button class="pas-btn" data-pas="3">PAS 3</button>
+        <button class="pas-btn" data-pas="4">PAS 4</button>
+    </div>
+    <h4>Headlight</h4>
+    <div class="command-grid">
+        <button id="lightOnBtn" class="btn-success">Headlight ON</button>
+        <button id="lightOffBtn" class="btn-danger">Headlight OFF</button>
+        <button id="alternativeBtn" class="btn-warning">Alternative State</button>
+    </div>
+</div>
+
+<div class="card">
+    <h3>Console Log</h3>
+    <button id="clearBtn" style="background:#555;font-size:0.8em;padding:5px 10px;">
+        Clear Log
+    </button>
+    <button id="exportBtn" class="btn-success" style="font-size:0.8em;padding:5px 10px;">
+        Export Log (.txt)
+    </button>
+    <input
+        type="text"
+        id="filterInput"
+        placeholder="Filter RX (e.g. 40)"
+        style="width:150px;display:inline-block;margin-left:10px;"
+    >
+    <div id="consoleLog" class="log-box" style="margin-top:10px;"></div>
+</div>
+
+<script src="js/script.js"></script>
+</body> 
+</html>
