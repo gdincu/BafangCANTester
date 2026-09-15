@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <title>Bafang CAN-BLE Tester icon</title>
+  <!-- Dark rounded-square app tile -->
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="#121212"/>
+  <rect x="8" y="8" width="496" height="496" rx="112" fill="none" stroke="#2e2e2e" stroke-width="16"/>
+  <!-- E-bike wheel / chainring: blue ring -->
+  <circle cx="256" cy="256" r="148" fill="none" stroke="#007bff" stroke-width="38"/>
+  <!-- Power bolt: Bafang orange -->
+  <polygon points="282,138 184,290 246,290 230,374 328,220 264,220"
+           fill="#ff9800" stroke="#121212" stroke-width="10"
+           stroke-linejoin="round"/>
+  <!-- Hub dot where the bolt crosses the axle -->
+  <circle cx="256" cy="256" r="14" fill="#121212"/>
+</svg>

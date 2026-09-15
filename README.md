@@ -16,6 +16,7 @@ A lightweight, web-based diagnostic utility to interface with Bafang e-bike syst
   - Real-time RX/TX activity feed
   - RX substring filtering (e.g., filter for specific packet types)
   - One-click export to timestamped `.txt` log file
+- **Installable PWA**: offline-capable app shell with custom icon, installable on desktop and mobile.
 
 ---
 
@@ -23,16 +24,14 @@ A lightweight, web-based diagnostic utility to interface with Bafang e-bike syst
 
 - **Browser**: A browser supporting the [Web Bluetooth API](https://caniuse.com/web-bluetooth), such as Google Chrome, Microsoft Edge, or Opera (desktop or Android).
 - **Environment**: Web Bluetooth requires a secure context (`https://`) or a local development server (`http://localhost` / `http://127.0.0.1`).
-- **Python**: Python 3.x installed (optional, used to serve files locally via `run.bat`).
 
 ---
 
 ## Getting Started
 
 1. **Start the local server**:
-   Double-click `run.bat` or run the following in your terminal:
-   ```bash
-   py -m http.server 8000
+   ```
+   eg. py -m http.server 8000
    ```
 2. **Open in browser**:
    Navigate to [http://localhost:8000](http://localhost:8000).
@@ -51,7 +50,24 @@ A lightweight, web-based diagnostic utility to interface with Bafang e-bike syst
 │   └── style.css      # Dark-theme styling
 ├── js/
 │   └── script.js      # Web Bluetooth logic, command handlers, and logging
+├── icons/
+│   ├── icon.svg            # Vector app icon (source)
+│   ├── favicon.svg         # SVG favicon
+│   ├── favicon.ico         # Legacy multi-size favicon
+│   ├── favicon-16x16.png / favicon-32x32.png
+│   ├── icon-192.png / icon-512.png        # PWA icons
+│   ├── maskable-512.png                   # Maskable PWA icon
+│   └── apple-touch-icon.png               # iOS home-screen icon
 ├── index.html         # User interface
-├── run.bat            # Quick-launch local Python HTTP server
+├── manifest.webmanifest  # PWA manifest
+├── sw.js              # PWA service worker (offline app shell)
 └── README.md          # Project documentation
 ```
+
+## Installing as an App (PWA)
+
+The app is installable and works offline (the app shell is cached on first visit):
+
+1. Serve over `https://` or `http://localhost` (required for both Web Bluetooth and the service worker).
+2. Open the app in Chrome/Edge/Opera, then use the browser's **Install** option (address-bar icon or menu → *Install Bafang CAN-BLE Tester*).
+3. On iOS, use Safari → Share → **Add to Home Screen** (uses `apple-touch-icon.png`).

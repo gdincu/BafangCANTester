@@ -1,5 +1,8 @@
+'use strict';
+
 const SERVICE_UUID = '0000fff0-0000-1000-8000-00805f9b34fb';
 const NOTIFY_UUID  = '0000fff4-0000-1000-8000-00805f9b34fb';
+const MAX_LOG_ENTRIES = 500;
 
 const COMMANDS = {
     PAS: {
@@ -30,18 +33,32 @@ const uuidInput = document.getElementById('uuidInput');
 const filterInput = document.getElementById('filterInput');
 const capabilitiesEl = document.getElementById('capabilities');
 
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch((error) => {
+            console.warn('Service worker registration failed:', error);
+        });
+    });
+}
+
 function timestamp() {
-    return new Date().toISOString().split('T')[1].slice(0, -1);
+    return new Date().toISOString().slice(11, 23);
 }
 
 function log(message, type = 'rx') {
     const prefix = type === 'tx' ? 'TX →' : type === 'error' ? 'ERROR' : 'RX ←';
     const line = `[${timestamp()}] ${prefix} ${message}`;
     logHistory.push(line);
+    if (logHistory.length > MAX_LOG_ENTRIES) {
+        logHistory.splice(0, logHistory.length - MAX_LOG_ENTRIES);
+    }
     const div = document.createElement('div');
     div.className = type;
     div.innerText = line;
     logEl.prepend(div);
+    while (logEl.children.length > MAX_LOG_ENTRIES) {
+        logEl.lastChild.remove();
+    }
 }
 
 function normalizeCharacteristicUUID(input) {
@@ -51,6 +68,10 @@ function normalizeCharacteristicUUID(input) {
     }
     if (/^[0-9a-f]{4}$/.test(uuid)) {
         return `0000${uuid}-0000-1000-8000-00805f9b34fb`;
+    }
+    const compact = uuid.replace(/-/g, '');
+    if (/^[0-9a-f]{32}$/.test(compact)) {
+        return `${compact.slice(0, 8)}-${compact.slice(8, 12)}-${compact.slice(12, 16)}-${compact.slice(16, 20)}-${compact.slice(20)}`;
     }
     if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(uuid)) {
         return uuid;
@@ -73,6 +94,27 @@ function hexToBytes(hexString) {
 
 function bytesToHex(bytes) {
     return Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+}
+
+function setConnectedUI(connected) {
+    document.getElementById('connectBtn').classList.toggle('hidden', connected);
+    document.getElementById('disconnectBtn').classList.toggle('hidden', !connected);
+    if (!connected) {
+        sendBtn.disabled = true;
+        sendWithResponseBtn.disabled = true;
+        capabilitiesEl.classList.add('hidden');
+    }
+}
+
+function updateWriteButtons() {
+    if (!targetCharacteristic) {
+        sendBtn.disabled = true;
+        sendWithResponseBtn.disabled = true;
+        return;
+    }
+    const props = targetCharacteristic.properties;
+    sendBtn.disabled = !(props.write || props.writeWithoutResponse);
+    sendWithResponseBtn.disabled = !props.write;
 }
 
 document.getElementById('connectBtn').addEventListener('click', async () => {
@@ -103,11 +145,9 @@ document.getElementById('connectBtn').addEventListener('click', async () => {
         }
 
         await resolveTargetCharacteristic();
-        sendBtn.disabled = !targetCharacteristic;
-        sendWithResponseBtn.disabled = !targetCharacteristic;
+        updateWriteButtons();
         statusEl.innerText = 'Status: Connected & Ready';
-        document.getElementById('connectBtn').style.display = 'none';
-        document.getElementById('disconnectBtn').style.display = 'inline-block';
+        setConnectedUI(true);
     } catch (error) {
         statusEl.innerText = 'Status: Connection Failed';
         log(error.name + ': ' + error.message, 'error');
@@ -120,34 +160,28 @@ async function resolveTargetCharacteristic() {
     targetCharacteristic = await service.getCharacteristic(uuid);
     const props = targetCharacteristic.properties;
 
-    const capabilities = [
+    capabilitiesEl.innerText = [
         `UUID: ${targetCharacteristic.uuid}`,
-        `broadcast: ${props.broadcast}`,
-        `read: ${props.read}`,
-        `writeWithoutResponse: ${props.writeWithoutResponse}`,
-        `write: ${props.write}`,
-        `notify: ${props.notify}`,
-        `indicate: ${props.indicate}`
+        `Properties: ${describeProperties(props)}`
     ].join('\n');
-
-    capabilitiesEl.innerText = capabilities;
-    capabilitiesEl.style.display = 'block';
+    capabilitiesEl.classList.remove('hidden');
     log(`Found ${targetCharacteristic.uuid}`, 'rx');
-    log(`Properties: ${capabilityString(props)}`, 'rx');
+    log(`Properties: ${describeProperties(props)}`, 'rx');
 
     if (!props.write && !props.writeWithoutResponse) {
         throw new Error(`Characteristic ${uuid} does not advertise WRITE or WRITE WITHOUT RESPONSE.`);
     }
 }
 
-function capabilityString(props) {
+function describeProperties(props) {
     const list = [];
+    if (props.broadcast) list.push('BROADCAST');
     if (props.read) list.push('READ');
     if (props.write) list.push('WRITE');
     if (props.writeWithoutResponse) list.push('WRITE_NO_RESPONSE');
     if (props.notify) list.push('NOTIFY');
     if (props.indicate) list.push('INDICATE');
-    return list.join(' | ');
+    return list.join(' | ') || 'NONE';
 }
 
 async function sendHexCommand(hexString, forceResponse = false) {
@@ -158,7 +192,12 @@ async function sendHexCommand(hexString, forceResponse = false) {
 
     try {
         if (!targetCharacteristic) {
+            if (!service || !gattServer || !gattServer.connected) {
+                log('Send Error: Device is not connected.', 'error');
+                return;
+            }
             await resolveTargetCharacteristic();
+            updateWriteButtons();
         }
 
         const bytes = hexToBytes(hexString);
@@ -186,56 +225,45 @@ async function sendHexCommand(hexString, forceResponse = false) {
     }
 }
 
+function sendPreset(hexString) {
+    if (!hexString) {
+        log('Send Error: Unknown preset command.', 'error');
+        return;
+    }
+    hexInput.value = hexString;
+    sendHexCommand(hexString, false);
+}
+
 sendBtn.addEventListener('click', () => sendHexCommand(hexInput.value, false));
 sendWithResponseBtn.addEventListener('click', () => sendHexCommand(hexInput.value, true));
 
 document.querySelectorAll('.pas-btn').forEach(button => {
-    button.addEventListener('click', () => {
-        const level = button.dataset.pas;
-        const command = COMMANDS.PAS[level];
-        hexInput.value = command;
-        sendHexCommand(command, false);
-    });
+    button.addEventListener('click', () => sendPreset(COMMANDS.PAS[button.dataset.pas]));
 });
 
-document.getElementById('lightOnBtn').addEventListener('click', () => {
-    const command = COMMANDS.HEADLIGHT_ON;
-    hexInput.value = command;
-    sendHexCommand(command, false);
-});
-
-document.getElementById('lightOffBtn').addEventListener('click', () => {
-    const command = COMMANDS.HEADLIGHT_OFF;
-    hexInput.value = command;
-    sendHexCommand(command, false);
-});
-
-document.getElementById('alternativeBtn').addEventListener('click', () => {
-    const command = COMMANDS.ALTERNATIVE;
-    hexInput.value = command;
-    sendHexCommand(command, false);
+document.querySelectorAll('.preset-btn').forEach(button => {
+    button.addEventListener('click', () => sendPreset(COMMANDS[button.dataset.preset]));
 });
 
 uuidInput.addEventListener('change', async () => {
     if (!service || !gattServer || !gattServer.connected) return;
     try {
         await resolveTargetCharacteristic();
-        sendBtn.disabled = false;
-        sendWithResponseBtn.disabled = false;
+        updateWriteButtons();
     } catch (error) {
         targetCharacteristic = null;
-        sendBtn.disabled = true;
-        sendWithResponseBtn.disabled = true;
+        updateWriteButtons();
         log(`Characteristic Error: ${error.message}`, 'error');
     }
 });
 
 function handleIncoming(event) {
-    const buffer = new Uint8Array(event.target.value.buffer);
+    const view = event.target.value;
+    const buffer = new Uint8Array(view.buffer, view.byteOffset, view.byteLength);
     const hexString = bytesToHex(buffer);
-    const filterValue = filterInput.value.trim().toUpperCase();
+    const filterValue = filterInput.value.replace(/[\s,:-]/g, '').toUpperCase();
 
-    if (!filterValue || hexString.includes(filterValue)) {
+    if (!filterValue || hexString.replace(/\s+/g, '').includes(filterValue)) {
         log(hexString, 'rx');
     } else {
         logHistory.push(`[${timestamp()}] RX ← ${hexString} (Hidden by filter)`);
@@ -243,22 +271,22 @@ function handleIncoming(event) {
 }
 
 document.getElementById('disconnectBtn').addEventListener('click', () => {
-    if (bleDevice && bleDevice.gatt.connected) {
-        bleDevice.gatt.disconnect();
+    try {
+        if (bleDevice && bleDevice.gatt && bleDevice.gatt.connected) {
+            bleDevice.gatt.disconnect();
+        }
+    } catch (error) {
+        log(`Disconnect Error: ${error.message}`, 'error');
     }
 });
 
 function onDisconnected() {
     statusEl.innerText = 'Status: Disconnected';
-    document.getElementById('connectBtn').style.display = 'inline-block';
-    document.getElementById('disconnectBtn').style.display = 'none';
-    sendBtn.disabled = true;
-    sendWithResponseBtn.disabled = true;
+    setConnectedUI(false);
     gattServer = null;
     service = null;
     targetCharacteristic = null;
     notifyCharacteristic = null;
-    capabilitiesEl.style.display = 'none';
     log('Bluetooth device disconnected.', 'error');
 }
 

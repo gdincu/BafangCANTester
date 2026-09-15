@@ -1,3 +1,7 @@
+:root {
+    color-scheme: dark;
+}
+
 body {
     font-family: system-ui, sans-serif;
     background: #121212;
@@ -36,6 +40,34 @@ button:disabled {
     cursor: not-allowed;
 }
 
+button:focus-visible,
+input[type="text"]:focus-visible {
+    outline: 2px solid #80cbc4;
+    outline-offset: 1px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.label-muted {
+    font-size: 0.9em;
+    color: #aaa;
+}
+
+.btn-muted {
+    background: #555;
+}
+
+.btn-muted:hover {
+    background: #444;
+}
+
+.btn-small {
+    font-size: 0.8em;
+    padding: 5px 10px;
+}
+
 .btn-danger {
     background: #dc3545;
 }
@@ -70,6 +102,12 @@ input[type="text"] {
     background: #2a2a2a;
     color: white;
     font-family: monospace;
+}
+
+input[type="text"].filter-input {
+    width: 150px;
+    display: inline-block;
+    margin-left: 10px;
 }
 
 .status {
@@ -116,6 +154,10 @@ input[type="text"] {
     font-size: 14px;
 }
 
+.log-box-spaced {
+    margin-top: 10px;
+}
+
 .tx {
     color: #ff9800;
 }
@@ -126,16 +168,6 @@ input[type="text"] {
 
 .error {
     color: #ff5252;
-}
-
-.muted {
-    color: #777;
-}
-
-hr {
-    border: 0;
-    border-top: 1px solid #333;
-    margin: 20px 0;
 }
 
 code {

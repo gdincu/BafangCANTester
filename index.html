@@ -3,25 +3,46 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Web-based diagnostic utility for Bafang e-bike CAN systems over Web Bluetooth (BLE).">
+<meta name="theme-color" content="#121212">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BafangCAN">
 <title>Bafang CAN-BLE Tester</title>
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon.ico" sizes="16x16 32x32 48x48">
+<link rel="icon" href="icons/favicon-32x32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="stylesheet" href="css/style.css">
 </head> 
 <body>
 
-<h2>Bafang CAN-BLE Tester</h2>
+<header>
+    <h2>Bafang CAN-BLE Tester</h2>
+</header>
+
+<main>
+<noscript>
+    <div class="card">
+        This app requires JavaScript and a browser with Web Bluetooth
+        support (Chrome, Edge or Opera).
+    </div>
+</noscript>
 
 <div class="card">
     <button id="connectBtn">Connect to Bike</button>
-    <button id="disconnectBtn" class="btn-danger" style="display:none;">
+    <button id="disconnectBtn" class="btn-danger hidden">
         Disconnect
     </button>
     <span id="status" class="status">Status: Disconnected</span>
-    <div id="capabilities" class="capabilities" style="display:none;"></div>
+    <div id="capabilities" class="capabilities hidden"></div>
 </div>
 
 <div class="card">
     <h3>Target Characteristic</h3>
-    <label for="uuidInput" style="font-size: 0.9em; color: #aaa;">
+    <label for="uuidInput" class="label-muted">
         Characteristic UUID:
     </label>
     <input
@@ -29,6 +50,9 @@
         id="uuidInput"
         value="FFF3"
         placeholder="FFF3 or 0000fff3-0000-1000-8000-00805f9b34fb"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
     >
     <div class="info">
         Accepted formats:
@@ -39,7 +63,7 @@
 
 <div class="card">
     <h3>Send Raw Command (Hex)</h3>
-    <label for="hexInput" style="font-size: 0.9em; color: #aaa;">
+    <label for="hexInput" class="label-muted">
         Payload (Hex):
     </label>
     <input
@@ -47,6 +71,10 @@
         id="hexInput"
         value="02 01 89 01 00 8B 03"
         placeholder="02 01 89 01 00 8B 03"
+        autocomplete="off"
+        autocapitalize="off"
+        spellcheck="false"
+        inputmode="text"
     >
     <button id="sendBtn" disabled>
         Send Command
@@ -72,28 +100,32 @@
     </div>
     <h4>Headlight</h4>
     <div class="command-grid">
-        <button id="lightOnBtn" class="btn-success">Headlight ON</button>
-        <button id="lightOffBtn" class="btn-danger">Headlight OFF</button>
-        <button id="alternativeBtn" class="btn-warning">Alternative State</button>
+        <button id="lightOnBtn" class="btn-success preset-btn" data-preset="HEADLIGHT_ON">Headlight ON</button>
+        <button id="lightOffBtn" class="btn-danger preset-btn" data-preset="HEADLIGHT_OFF">Headlight OFF</button>
+        <button id="alternativeBtn" class="btn-warning preset-btn" data-preset="ALTERNATIVE">Alternative State</button>
     </div>
 </div>
 
 <div class="card">
     <h3>Console Log</h3>
-    <button id="clearBtn" style="background:#555;font-size:0.8em;padding:5px 10px;">
+    <button id="clearBtn" class="btn-small btn-muted">
         Clear Log
     </button>
-    <button id="exportBtn" class="btn-success" style="font-size:0.8em;padding:5px 10px;">
+    <button id="exportBtn" class="btn-success btn-small">
         Export Log (.txt)
     </button>
     <input
         type="text"
         id="filterInput"
+        class="filter-input"
         placeholder="Filter RX (e.g. 40)"
-        style="width:150px;display:inline-block;margin-left:10px;"
+        aria-label="Filter received packets"
+        autocomplete="off"
+        spellcheck="false"
     >
-    <div id="consoleLog" class="log-box" style="margin-top:10px;"></div>
+    <div id="consoleLog" class="log-box log-box-spaced"></div>
 </div>
+</main>
 
 <script src="js/script.js"></script>
 </body> 
